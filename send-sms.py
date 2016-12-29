@@ -9,7 +9,7 @@ from twilio.rest import TwilioRestClient
 # 2. Edit this file to add the appropriate SID and auth token, as well as phone numbers, below
 # 3. Save this version to disk
 # 4. Send to the Yun via scp in Git Bash as follows:
-#     scp send-sms.py username@arduinoname.local:~/../arduino/
+#     scp send-sms.py username@arduinoname.local:/arduino
 # 5. Remove this version of the file from Git by checking out the original version again.
 #    WARNING: DO NOT SAVE PROPRIETARY INFO IN THE PUBLIC ACCESSIBLE GITHUB PROJECT!
 
