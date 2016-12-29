@@ -87,7 +87,7 @@ void firePixelPattern(int brightness) {
     { 250, 0, 0 },
     { 0, 250, 0 },
     { 0, 0, 250 },
-    { 0, 0, 0 },
+    { 128, 128, 0 },
   };
   static int NUM_PATTERNS = sizeof(colors)/sizeof(colors[0]);
   float scale = brightness / MAX_BRIGHTNESS;
@@ -126,10 +126,36 @@ void sendSMS(const String& message_p) {
   }
 }
 
+void sendAIO(int value_10bit) {
+  Process p;
+  String feed = "magic-30402-ldr";
+  p.begin("python");
+  p.addParameter("/arduino/send-aio.py");
+  p.addParameter(feed);
+  String valueStr = String(value_10bit);
+  p.addParameter(valueStr);
+  Serial.print("Sending to Adafruit.io<");
+  Serial.print(feed);
+  Serial.print(",");
+  Serial.print(valueStr);
+  Serial.print(">...");
+  int result = p.run();
+  if (result == 0) {
+    Serial.println("Done.");
+  } else {
+    Serial.print("Error: ");
+    while (p.available()) {
+      char c = p.read();
+      Serial.print(c);
+    }
+    Serial.println("");
+  }
+}
+
 String makeTextMessage(int brightness, int timestamp) {
-  String result = "BRT=";
+  String result = "B=";
   result += String(brightness);
-  result +=  "/1023, TMS=";
+  result +=  ",T=";
   result +=  String(timestamp);
   return result;
 }
@@ -171,7 +197,9 @@ void loop() {
         lcd.setCursor(0, 1);
         lcd.print(text);
         sendSMS(text);
+        sendAIO(ambient);
 
+        sendColorToAllPixels(0, 0, 0);
     } else if (!receiver->isEmpty()) {
       Serial.print("False positive skipped...");
        receiver->dump(Serial);
