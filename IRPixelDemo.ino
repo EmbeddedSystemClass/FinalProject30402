@@ -161,6 +161,21 @@ String makeTextMessage(int brightness, size_t timestamp) {
   return result;
 }
 
+void takePicture() {
+  Process p;
+  p.begin("fswebcam");
+  p.addParameter("/arduino/pic.jpg");
+  p.addParameter("-r 640x480");
+  p.run();
+}
+
+void uploadPicture() {
+  Process p;
+  p.begin("python");
+  p.addParameter("/arduino/upload-to-dropbox.py");
+  p.run();
+}
+
 /////////  PROGRAM STARTS HERE
 
 void setup() {
@@ -207,5 +222,15 @@ void loop() {
        receiver->dump(Serial);
     }
 
-    delay(100); // msec delay
+    uint8_t buttons = lcd.readButtons();
+    if (buttons) {
+      if (buttons & BUTTON_SELECT) {
+        Serial.print("Smile.. you're on candid camera ... ");
+        takePicture();
+        Serial.print("uploading ...");
+        uploadPicture();
+        Serial.println("Done. Check your dropbox.");
+      }
+    }
+    delay(50); // msec delay
 }
