@@ -34,7 +34,7 @@ Adafruit_RGBLCDShield lcd = Adafruit_RGBLCDShield();
 #define BUFFERSIZE 200U
 #define BAUD 115200
 
-// END IR LIB SECTION 
+// END IR LIB SECTION
 
 // Which pin on the Arduino is connected to the NeoPixels?
 // On a Trinket or Gemma we suggest changing this to 1
@@ -68,7 +68,7 @@ int fround(float n) {
 }
 
 void sendColorToAllPixels(int red, int green, int blue) {
-  
+
   for(int i=0;i<NUMPIXELS;i++){
 
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
@@ -169,7 +169,7 @@ void setup() {
     Bridge.begin();
     pixels.begin(); // This initializes the NeoPixel library.
     sendColorToAllPixels(0, 0, 0);
-    // set up the LCD's number of columns and rows: 
+    // set up the LCD's number of columns and rows:
     lcd.begin(16, 2);
     lcd.setBacklight(WHITE);
     lcd.clear();
@@ -191,8 +191,7 @@ void loop() {
         Serial.print(" -> ");
        receiver->dump(Serial);
 
-        int compensate = MAX_BRIGHTNESS - ambient;
-        firePixelPattern(compensate);
+        firePixelPattern(ambient);
 
         String text = makeTextMessage(ambient, timestamp);
         lcd.setCursor(0, 1);
