@@ -55,6 +55,7 @@ int delayval = 500; // delay for half a second
 // this is the analog pin that the LDR divider is hooked to
 #define LDR_PIN         A4
 #define MAX_BRIGHTNESS  1023.0
+#define AMBIENT_THRESHOLD 200.0
 
 //////// END ANALOG SECTION
 
@@ -152,7 +153,7 @@ void sendAIO(int value_10bit) {
   }
 }
 
-String makeTextMessage(int brightness, int timestamp) {
+String makeTextMessage(int brightness, size_t timestamp) {
   String result = "B=";
   result += String(brightness);
   result +=  ",T=";
@@ -182,7 +183,7 @@ void loop() {
     if (receiver->getDataLength() > 2) {
 
         int ambient = readAmbientBrightness();
-        int timestamp = millis();
+        size_t timestamp = millis();
         Serial.print("IR Detection @ BRT=");
         Serial.print(ambient);
         Serial.print(", T=");
@@ -196,7 +197,9 @@ void loop() {
         String text = makeTextMessage(ambient, timestamp);
         lcd.setCursor(0, 1);
         lcd.print(text);
-        sendSMS(text);
+        if (ambient > AMBIENT_THRESHOLD) {
+          sendSMS(text);
+        }
         sendAIO(ambient);
 
         sendColorToAllPixels(0, 0, 0);
