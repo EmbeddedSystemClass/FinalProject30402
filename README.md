@@ -43,6 +43,25 @@ To do these scripts, the Linux side had to be prepared.
 	- `scp` uses the same security methods (and is based on) `ssh`, both of which can be called on Windows from the Git Bash shell.
 	- for my setup, this meant that I used root@ardmike.local for both the above and ssh login, you may need arduino.local or linino.local on yours
 
+## Parts List ##
+
+- Arduino Yun (Sparkfun Electronics, $75)
+- Kymera IR wand (Amazon, $65)
+- IR receiver TSOP-38238 (Adafruit p/n 157, $1.95)
+- CdS photocell (laying around)
+- 1x 10k resistor (laying around)
+- Adafruit LCD shield kit (p/n 772, $19.95) - ASSEMBLY AND SOLDERING REQUIRED!
+- Adafruit Flora NeoPixel Ring (16 pixels) (p/n 1463, $9.95)
+- Adafruit 8mm Through-hole Single NeoPixel (p/n 1734, $4.95 for 5 pack)
+- 1x 1000uF electrolytic capacitor (Fry's, $2.95)
+- 2x 0.1uF ceramic capacitor (Fry's, 2 for $1.50)
+- 1x 4.7k resistor (laying around)
+- Logitech 5000 webcam (or other USB webcam, laying around)
+- breadboard, cables, and jumper wires (as ordered from class notes, about $20)
+
+This cost about $200 in parts, but I wanted to have the Kymera anyway. There are cheaper remotes out there, or use the one from your TV.
+I thank the City of Sunnyvale for paying for $135 of this for me as part of my WIB grant, as well as my tuition to class.
+
 ## Hardware Setup ##
 
 As shown in the block diagram, we need to wire up Adafruit NeoPixels (I used a single 8mm device and a 16-pixel ring), a TSOP-38238 tuned IR receiver device, a CdS photocell circuit (ambient light sensor, the data used), and the Adafruit LCD shield (16x2 LCD blue and white display stick with attached buttons and I2C bus operation). In addition, I plugged a Logitech 5000 webcam into the USB Host port (USB A connector) of the Arduino Yun. This all fit on a breadboard that was connected to the Arduino Yun, which was connected to my Windows 10 laptop (Microsoft Surface Pro 2) via the USB Micro-B port on the Yun. The LCD Shield was connected via 2-wire I2C bus to the Arduino SDA and SCL pins. These were the only pins required on the shield besides power and ground (5V power).
@@ -74,15 +93,15 @@ Global variables use 1,164 bytes (45%) of dynamic memory, leaving 1,396 bytes fo
 ----------
 Linux results for `df -h`:
 
-root@ardmike:~# df -h
-Filesystem                Size      Used Available Use% Mounted on
-rootfs                   10.4G    510.6M      9.4G   5% /
-/dev/root                 7.5M      7.5M         0 100% /rom
-tmpfs                    29.8M    100.0K     29.7M   0% /tmp
-tmpfs                   512.0K         0    512.0K   0% /dev
-/dev/sda2                10.4G    510.6M      9.4G   5% /overlay
-overlayfs:/overlay       10.4G    510.6M      9.4G   5% /
-/dev/sda1                 4.0G     12.0K      4.0G   0% /mnt/sda1
+    root@ardmike:~# df -h
+    FilesystemSize  Used Available Use% Mounted on
+    rootfs   10.4G510.6M  9.4G   5% /
+    /dev/root 7.5M  7.5M 0 100% /rom
+    tmpfs29.8M100.0K 29.7M   0% /tmp
+    tmpfs   512.0K 0512.0K   0% /dev
+    /dev/sda210.4G510.6M  9.4G   5% /overlay
+    overlayfs:/overlay   10.4G510.6M  9.4G   5% /
+    /dev/sda1 4.0G 12.0K  4.0G   0% /mnt/sda1
 
 ----------
 
