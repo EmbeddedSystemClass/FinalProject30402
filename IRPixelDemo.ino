@@ -176,6 +176,11 @@ void uploadPicture() {
   p.run();
 }
 
+void updateLCDStatus(char c) {
+  lcd.setCursor(15,0);
+  lcd.print(c);
+}
+
 /////////  PROGRAM STARTS HERE
 
 void setup() {
@@ -193,10 +198,15 @@ void setup() {
 }
 
 void loop() {
+
+    // check the IR receiver for any response (causes delay timeout)
     receiver->receive(); // combines enable, loop, disable
 
     if (receiver->getDataLength() > 2) {
-
+        // PROPER RESPONSE LENGTH - process the IR command
+        
+        // read sensors, generate debug output including IR sensor dump
+        updateLCDStatus('R');
         int ambient = readAmbientBrightness();
         size_t timestamp = millis();
         Serial.print("IR Detection @ BRT=");
@@ -204,33 +214,51 @@ void loop() {
         Serial.print(", T=");
         Serial.print(timestamp);
         Serial.print(" -> ");
-       receiver->dump(Serial);
+        receiver->dump(Serial);
 
+        // fire up the Neopixels
+        updateLCDStatus('P');
         firePixelPattern(ambient);
 
+        // prepare the response text
         String text = makeTextMessage(ambient, timestamp);
+
+        // update the LCD response
         lcd.setCursor(0, 1);
         lcd.print(text);
+
+        // send the text message if room is bright enough
         if (ambient > AMBIENT_THRESHOLD) {
+          updateLCDStatus('T');
           sendSMS(text);
         }
+
+        // send the data to Adafruit.io in the cloud
+        updateLCDStatus('A');
         sendAIO(ambient);
 
+        // shut off Neopixels to save power
+        updateLCDStatus(' ');
         sendColorToAllPixels(0, 0, 0);
     } else if (!receiver->isEmpty()) {
-      Serial.print("False positive skipped...");
-       receiver->dump(Serial);
+        // the IR library has a tendency to trigger falsely with 2-byte data that we should ignore
+        Serial.print("False positive skipped...");
+        receiver->dump(Serial);
     }
 
+    // also, check for any buttons pressed (need to hold at least as long as the timeout delay)
     uint8_t buttons = lcd.readButtons();
     if (buttons) {
       if (buttons & BUTTON_SELECT) {
         Serial.print("Smile.. you're on candid camera ... ");
+        updateLCDStatus('*');
         takePicture();
         Serial.print("uploading ...");
+        updateLCDStatus('U');
         uploadPicture();
         Serial.println("Done. Check your dropbox.");
+        updateLCDStatus(' ');
       }
     }
-    delay(50); // msec delay
+    //  delay(50); // extra msec delay not needed due to IR timeout
 }
