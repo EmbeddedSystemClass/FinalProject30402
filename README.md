@@ -49,7 +49,9 @@ As shown in the block diagram, we need to wire up Adafruit NeoPixels (I used a s
 
 ## Programming the Code ##
 
-Some of the time I programmed directly over this port, but mostly used it for power, and downloaded sketch code via the WiFi link port into the Yun from my Windows 7 PC. I also used Git Bash `ssh username@arduinoname.local` to access the Linux side directly over WiFi, negating the need to use PuTTY for the SSH capability. This was so I could use my 30-inch monitor to make it easier to see to program. The Surface is great for portability to class, but just can't cut it as a great desktop machine, whether doing Arduino sketches or Linux command line.
+Some of the time I programmed directly over the USB COM port, but mostly used it for power, and downloaded sketch code via the WiFi link port into the Yun from my Windows 7 PC. I also used Git Bash `ssh username@arduinoname.local` to access the Linux side directly over WiFi, negating the need to use PuTTY for the SSH capability. This was so I could use my 30-inch monitor to make it easier to see to program. The Surface is great for portability to class, but just can't cut it as a great desktop machine, whether doing Arduino sketches or Linux command line.
+
+By downloading sketch code directly using the WiFi port from the Arduino IDE, I was able to do most of my programming on the Windows 7 desktop, and left the direct COM port line for when I wanted to see the Serial debugging output I had included in the sketch. There did not seem to be a way to get output from the Python scripts back into the sketch though. Perhaps this bears further investigation.
 
 ## Software Architecture ##
 
@@ -61,7 +63,28 @@ Libraries used for the Arduino Yun sketch:
 
 - The TSOP-38238 uses Bengtt Martensson's IR4Arduino library [here](https://github.com/bengtmartensson/Infrared4Arduino).
 - The Adafruit NeoPixels use their provided library discussed [here](https://learn.adafruit.com/adafruit-neopixel-uberguide?view=all). (This includes additional circuit requirements. USB power was sufficient.)
-- The Adafruit LCD Shield uses their provided library discussed [here](https://learn.adafruit.com/rgb-lcd-shield?view=all).  
+- The Adafruit LCD Shield uses their provided library discussed [here](https://learn.adafruit.com/rgb-lcd-shield?view=all). 
+
+----------
+Usage requirements for sketch binary:
+  
+Sketch uses 19,840 bytes (69%) of program storage space. Maximum is 28,672 bytes.
+Global variables use 1,164 bytes (45%) of dynamic memory, leaving 1,396 bytes for local variables. Maximum is 2,560 bytes.
+
+----------
+Linux results for `df -h`:
+
+root@ardmike:~# df -h
+Filesystem                Size      Used Available Use% Mounted on
+rootfs                   10.4G    510.6M      9.4G   5% /
+/dev/root                 7.5M      7.5M         0 100% /rom
+tmpfs                    29.8M    100.0K     29.7M   0% /tmp
+tmpfs                   512.0K         0    512.0K   0% /dev
+/dev/sda2                10.4G    510.6M      9.4G   5% /overlay
+overlayfs:/overlay       10.4G    510.6M      9.4G   5% /
+/dev/sda1                 4.0G     12.0K      4.0G   0% /mnt/sda1
+
+----------
 
 ## Additional Features ##
 
@@ -89,3 +112,15 @@ I hooked a USB power monitor (Rui-Deng, no longer sold by Adafruit) in series wi
 - Status 'T' or 'A' - Neopixels on high (Brightness = 877 out of 1023) with WiFi on: 0.99A
 - Status 'T' or 'A' - Neopixels on low (Brightness = 70 out of 1023) with WiFi on: 0.66A
 - Status '*' or 'U' - Neopixels off with WiFi on: 0.64A
+
+## Suggestions for Improvement ##
+
+1. I really don't try to differentiate IR signals (remote control codes). The wand can send 13 different signals, but the timing variances make the classification problem difficult. The IR4Arduino library didn't seem to have (or I couldn't find) a simple function set that would return a particular normalized timing signal that represented an ideal code. Perhaps it exists, perhaps not. The idea that most often came to mind while studying this, was that this seemed to be a good use case for the Arduino 101 (new replacement for Arduino Uno), with its Intel Curie module and the 128-neuron Pattern Recognition hardware. A neuron could be trained for each signal needed, and different wand commands could be triggered. This seemed to be overkill for my demo situation, however.
+2. I really didn't delve much into Neopixel programming. My "pattern" just sent the same color to all 17 pixels, and changed it 3 times. This could be augmented with spatially-interesting patterns as well, such as rotating an every-3rd-pixel pattern in 3 positions, with the other pixels left dark. I also thought about using random colors for each pixel and just shifting them a few times. Also, I considered various geometric or algorithmic designs, such as each pixel is a fraction brighter or dimmer than the last, all in the same basic color. But this would work best with some other color scheme, such as HSV with a converter to RGB. I didn't feel like writing all this, or exploring whether another library would support this mode better.
+3. A different sensor could take the place of the LDR's simple analog input. I briefly considered using a more complicated light sensor, such as the TSL2561 which I had previously bought, or the required DHT-11 digital temperature/humidity sensor, or the Bosch BME-280 which also had pressure. (I used this in my FinalProject5381 for another course.)
+4. Just using the pic in Dropbox to send an MMS text via Twilio, instead of the data in a string for SMS. This would take about a minute to complete though.
+5. Cloud data processing or AI for the uploaded pic file (see IBM Watson usage in Bluemix cloud for typical possibilities). Image recognition, object classification, many other things are possible.
+6. Twilio can cause scripted things to happen when making a phone call. I toyed with calling the phone number provided and playing the Harry Potter theme to the caller, or something similar.
+7. Causing a shutter click sound when the pic is taken. This would require a way to download and play audio files from the gadget. Possibly easier to do on the Linux side if a USB audio device can be controlled. The webcam I used (Logitech 5000) has a mic but no speaker. Since there is only one USB port, a hub would be needed. Or perhaps a way to play the file on the MCU side would be workable. But data is limited there, even in flash PROGMEM.
+8. Try to fix the Linux Python 2.7.3 issues with TLS security calls. There are some suggestions offered, but when I first tried them, they failed because I hadn't installed the compiler. But now that I have that, I may pursue this solution, rather than wait for Arduino folks to release new firmware.
+
